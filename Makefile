@@ -34,11 +34,11 @@ test-certs:
 
 .PHONY: test
 test:
+	TEST_REDIS_URI="redis://localhost:6379" \
 	TEST_VALKEY7_URI="valkey://localhost:16384" \
 	TEST_VALKEY8_URI="valkey://localhost:16382" \
 	TEST_VALKEY8_TLS_URI="valkeys://localhost:16386" \
 	TEST_REDIS7_TLS_URI="rediss://localhost:16387" \
-	TEST_REDIS_URI="redis://localhost:16385" \
 	TEST_REDIS8_URI="redis://localhost:16388" \
 	TEST_REDIS7_URI="redis://localhost:16385" \
 	TEST_REDIS5_URI="redis://localhost:16383" \
@@ -50,9 +50,9 @@ test:
 	TEST_USER_PWD_REDIS_URI="redis://exporter:exporter-password@localhost:16390" \
 	TEST_REDIS_CLUSTER_MASTER_URI="redis://localhost:17000" \
 	TEST_REDIS_CLUSTER_SLAVE_URI="redis://localhost:17005" \
-	TEST_REDIS_CLUSTER_PASSWORD_URI="redis://localhost:17006" \
+	TEST_VALKEY_CLUSTER_PASSWORD_URI="redis://localhost:17006" \
 	TEST_TILE38_URI="redis://localhost:19851" \
-	TEST_REDIS_SENTINEL_URI="redis://localhost:26379" \
+	TEST_VALKEY_SENTINEL_URI="redis://localhost:26379" \
 	TEST_REDIS_MODULES_URI="redis://localhost:36379" \
 	go test -v -covermode=atomic -cover -race -coverprofile=coverage.txt -p 1 ./...
 

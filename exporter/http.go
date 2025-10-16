@@ -89,18 +89,17 @@ func (e *Exporter) scrapeHandler(w http.ResponseWriter, r *http.Request) {
 		opts.CountKeys = cntk
 	}
 
-	registry := prometheus.NewRegistry()
-	opts.Registry = registry
+	opts.Registry = prometheus.NewRegistry()
 
 	_, err = NewRedisExporter(target, opts)
 	if err != nil {
-		http.Error(w, "NewRedisExporter() err: err", http.StatusBadRequest)
+		http.Error(w, fmt.Sprintf("NewRedisExporter() error: %v", err), http.StatusBadRequest)
 		e.targetScrapeRequestErrors.Inc()
 		return
 	}
 
 	promhttp.HandlerFor(
-		registry, promhttp.HandlerOpts{ErrorHandling: promhttp.ContinueOnError},
+		opts.Registry, promhttp.HandlerOpts{ErrorHandling: promhttp.ContinueOnError},
 	).ServeHTTP(w, r)
 }
 

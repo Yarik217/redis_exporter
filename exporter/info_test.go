@@ -35,8 +35,15 @@ func TestKeyspaceStringParser(t *testing.T) {
 
 		{db: "db0", stats: "keys=1,expires=0,avg_ttl=0", keysTotal: 1, keysEx: 0, avgTTL: 0, keysCached: -1, ok: true},
 		{db: "db0", stats: "keys=1,expires=0,avg_ttl=0,cached_keys=0", keysTotal: 1, keysEx: 0, avgTTL: 0, keysCached: 0, ok: true},
+
+		{
+			db: "db0", stats: "keys=25714011,expires=25091314,avg_ttl=685620459,subexpiry=0",
+			keysTotal: 25714011, keysEx: 25091314, keysCached: 0, avgTTL: 685620.459000,
+			ok: true,
+		},
 	}
 
+	log.SetLevel(log.DebugLevel)
 	for _, tst := range tsts {
 		if kt, kx, ttl, kc, ok := parseDBKeyspaceString(tst.db, tst.stats); true {
 
@@ -46,7 +53,12 @@ func TestKeyspaceStringParser(t *testing.T) {
 			}
 
 			if ok && (kt != tst.keysTotal || kx != tst.keysEx || kc != tst.keysCached || ttl != tst.avgTTL) {
-				t.Errorf("values not matching, db:%s stats:%s   %f %f %f %f", tst.db, tst.stats, kt, kx, kc, ttl)
+				t.Errorf("values not matching, db:%s stats:%s   %f != %f   %f != %f  %f != %f  %f != %f",
+					tst.db, tst.stats,
+					kt, tst.keysTotal,
+					kx, tst.keysEx,
+					kc, tst.keysCached,
+					ttl, tst.avgTTL)
 			}
 		}
 	}
@@ -141,7 +153,7 @@ func TestInclMetricsForEmptyDatabases(t *testing.T) {
 		t.Run(fmt.Sprintf("inclMetrics:%t", inclMetrics), func(t *testing.T) {
 			e, _ := NewRedisExporter(addr,
 				Options{
-					Namespace: "test", Registry: prometheus.NewRegistry(),
+					Namespace:                    "test",
 					InclMetricsForEmptyDatabases: inclMetrics,
 				})
 			ts := httptest.NewServer(e)
@@ -167,7 +179,7 @@ func TestClusterMaster(t *testing.T) {
 	}
 
 	addr := os.Getenv("TEST_REDIS_CLUSTER_MASTER_URI")
-	e, _ := NewRedisExporter(addr, Options{Namespace: "test", Registry: prometheus.NewRegistry()})
+	e, _ := NewRedisExporter(addr, Options{Namespace: "test"})
 	ts := httptest.NewServer(e)
 	defer ts.Close()
 
@@ -198,7 +210,6 @@ func TestClusterSkipCheckKeysIfMaster(t *testing.T) {
 			e, _ := NewRedisExporter(
 				uri,
 				Options{Namespace: "test",
-					Registry:                   prometheus.NewRegistry(),
 					CheckKeys:                  TestKeyNameHll,
 					SkipCheckKeysForRoleMaster: skip,
 					IsCluster:                  true,
@@ -237,7 +248,7 @@ func TestClusterSlave(t *testing.T) {
 	}
 
 	addr := os.Getenv("TEST_REDIS_CLUSTER_SLAVE_URI")
-	e, _ := NewRedisExporter(addr, Options{Namespace: "test", Registry: prometheus.NewRegistry()})
+	e, _ := NewRedisExporter(addr, Options{Namespace: "test"})
 	ts := httptest.NewServer(e)
 	defer ts.Close()
 

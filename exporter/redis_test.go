@@ -6,8 +6,6 @@ import (
 	"os"
 	"strings"
 	"testing"
-
-	"github.com/prometheus/client_golang/prometheus"
 )
 
 func TestHostVariations(t *testing.T) {
@@ -85,7 +83,6 @@ func TestPasswordProtectedInstance(t *testing.T) {
 				tst.addr,
 				Options{
 					Namespace: "test",
-					Registry:  prometheus.NewRegistry(),
 					User:      tst.user,
 					Password:  tst.pwd,
 				})
@@ -108,7 +105,7 @@ func TestPasswordInvalid(t *testing.T) {
 	testPwd := "redis-password"
 	uri := strings.Replace(os.Getenv("TEST_PWD_REDIS_URI"), testPwd, "wrong-pwd", -1)
 
-	e, _ := NewRedisExporter(uri, Options{Namespace: "test", Registry: prometheus.NewRegistry()})
+	e, _ := NewRedisExporter(uri, Options{Namespace: "test"})
 	ts := httptest.NewServer(e)
 	defer ts.Close()
 
@@ -120,9 +117,9 @@ func TestPasswordInvalid(t *testing.T) {
 }
 
 func TestConnectToClusterUsingPasswordFile(t *testing.T) {
-	clusterUri := os.Getenv("TEST_REDIS_CLUSTER_PASSWORD_URI")
+	clusterUri := os.Getenv("TEST_VALKEY_CLUSTER_PASSWORD_URI")
 	if clusterUri == "" {
-		t.Skipf("TEST_REDIS_CLUSTER_PASSWORD_URI is not set")
+		t.Skipf("TEST_VALKEY_CLUSTER_PASSWORD_URI is not set")
 	}
 	passMap := map[string]string{clusterUri: "redis-password"}
 	wrongPassMap := map[string]string{"redis://redis-cluster-password-wrong:7006": "redis-password"}
